@@ -54,12 +54,35 @@ def corners(image):
     #print "hsv values UpperRight", hsv[100][880]
     #print "hsv values LowerLeft", hsv[393][393]
     #print "hsv values LowerRight", hsv[412][904]
+    tmp = cv2.cvtColor(res,cv2.COLOR_HSV2BGR)
+    bwimg = cv2.cvtColor(tmp,cv2.COLOR_BGR2GRAY)
+    #cv2.imshow('grey corners',bwimg)
+#Finding coherent elements
     if cv2.__version__[0]=='3': #For opencv 3.0
-       _, contours, hierarchy = cv2.findContours(res, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+       _, contours, hierarchy = cv2.findContours(bwimg, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     else: #For opencv <3.0
-        contours, hierarchy = cv2.findContours(res, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, hierarchy = cv2.findContours(bwimg, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    for cnt in contours:
+        areal = cv2.contourArea(cnt)
+        if(areal)>1:
+            M = cv2.moments(cnt)
+            cx = int(M['m10']/M['m00'])
+            cy = int(M['m01']/M['m00'])
 
 
+            #alternativ
+            # cx=sum(cnt[:,0][:,0]) / len(cnt[:,0][:,0])
+            # cy=sum(cnt[:,0][:,1]) / len(cnt[:,0][:,1])
+
+
+            # Print et sigtekorn der markerer elementet. (se handout)
+            # <ret disse linjer>
+            cv2.circle(image, (cx, cy), 8, (255, 0, 255), -1)
+            cv2.circle(image, (cx, cy), 20, (255, 0, 255), 4)
+            cv2.line(image, (0, cy), (1000, cy), (255, 0, 255), 4)
+            cv2.line(image, (cx, 0), (cx, 1000), (255, 0, 255), 4)
+            # </ret disse linjer>
+            cv2.imshow('Cross airs',image)
 
 corners(img)
 
