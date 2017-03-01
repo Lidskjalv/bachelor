@@ -1,3 +1,4 @@
+#pragma once
 #include <vector>
 #include <iostream>
 #include <cmath>
@@ -19,7 +20,7 @@ struct Pixel {
 class aStar
 {
 public:
-    aStar(vector<vector<int> > aRoadMap,int aStartX, int aStartY, int aEndX, int aEndY);
+    aStar(vector<vector<int> > * aRoadMap,int aStartX, int aStartY, int aEndX, int aEndY);
 	~aStar();
     void navigate(int startX, int startY);
     Pixel * getLowestF(); //Priority que?
@@ -36,21 +37,24 @@ public:
     void calcScore(Pixel* aPixel);
     void calcG(Pixel* aPixel);
 	bool withinMap(int x, int y);
-	vector<vector<Pixel>> intToPixel(vector<vector<int>> input);
+	vector<vector<Pixel> > *  intToPixel(vector<vector<int> > * input);
 	void printMap();
+	vector<vector<int>> * getMap();
 private:
+	//Data for A*
 	vector<Pixel *> openList;
 	vector<Pixel *> closedList;
 	vector<Pixel *> adjecentSquares;
 	vector<int> shortPX;
 	vector<int> shortPY;
-    vector<vector<Pixel> > roadmap;
+	//Maps and their properties
+    vector<vector<Pixel> > * roadmap; //A* uses this map
+	vector<vector<int>> * inputMap; //This map is used for input and output
     const int walkAble = 0;
     int endX;
     int endY;
 	int startX, startY;
 	int width;
 	int height;
-	vector<vector<int>> inputMap;
 };
 
