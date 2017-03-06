@@ -158,8 +158,8 @@ def colorScale(image):
 
 """-------- ROS controls -----------"""
 def talker():
-    pub = rospy.Publisher('chatter',String, queue_size = 10) #topic=chatter
-    rospy.init_node('talker',anonymous=False)                #NOT a unique name
+    pub = rospy.Publisher('map',String, queue_size = 10) #topic=chatter
+    rospy.init_node('featureDetection',anonymous=False)                #NOT a unique name
     rate = rospy.Rate(1) # 1 hz                              #rate of publishing
     """            Workspace                """
     cropped=autoCrop(img)                            # Returns a picture which is cropped to fit
