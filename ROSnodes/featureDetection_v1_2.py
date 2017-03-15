@@ -26,7 +26,8 @@ import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 
-VERBOSE=True
+VERBOSE=False
+
 def row(image):                                   #Prints the # of rows
     rows=0
     for col in image:
@@ -67,6 +68,10 @@ def findRed(image):                               #Finds Red in image
 def colorScale(image):
     image[image == 255] = 7
 
+
+def save(image):
+    cv2.imwrite('featureDetectionV1_2.png',image)
+
 class image_feature:
 
     def __init__(self):
@@ -74,6 +79,8 @@ class image_feature:
         # topic where we publish
         self.image_pub = rospy.Publisher("/output/image_treated",
             Image,queue_size = 1)
+
+        self.image_pub_display = rospy.Publisher("/display_image",Image,queue_size =1)
         # self.bridge = CvBridge()
 
         # subscribed Topic
@@ -83,28 +90,27 @@ class image_feature:
             print "subscribed to /camera/image/compressed"
 
 
-
-
-
-
-    def callback(self, ros_data):
+    def callback(self,ros_data):
         bridge=CvBridge()
         img = bridge.imgmsg_to_cv2(ros_data,"bgr8")
-
         obj=findRed(img)
         colorScale(obj)
-        makeMatrix(obj)
-
-        msg=bridge.cv2_to_imgmsg(img, encoding="bgr8")
-
+        #makeMatrix(obj)
+        #save(obj)
+        if VERBOSE:
+            cv2.imshow('the raw image',img)
+            cv2.imshow('consist only of 0 and 7',obj)
+            cv2.waitKey(2)
+        msg=bridge.cv2_to_imgmsg(obj, encoding="8UC1")
+        msg2=bridge.cv2_to_imgmsg(img,encoding="bgr8")
 
         self.image_pub.publish(msg)
-
+        self.image_pub_display.publish(msg2)
         #self.subscriber.unregister()
 
 def main(args):
     '''Initializes and cleanup ros node'''
-    ic = image_feature()
+    image_feature()
     rospy.init_node('feature_detect', anonymous=False)
     try:
         rospy.spin()
@@ -114,3 +120,4 @@ def main(args):
 
 if __name__ == '__main__':
     main(sys.argv)
+
