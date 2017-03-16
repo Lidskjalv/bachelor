@@ -1,39 +1,62 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
+
+# Python libs
+import sys, time
+
+# numpy and scipy
+import numpy as np
+from scipy.ndimage import filters
+
+# OpenCV
+import cv2
+# Ros libraries
+import roslib
 import rospy
-import subprocess
-from std_msgs.msg import String
+
+# Ros Messages
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+VERBOSE = False
+def printE(image):                                #Prints the elements in the picture
+    countCol = 0
+    countRow = 0
+    for col in image:
+        countCol +=1
+        print col
+        for row in col:
+            #print row
+            countRow +=1
+    print "coloums: %i. rows %i " %(countCol,countRow/countCol)
+
+class path_planner:
+
+    def __init__(self):
+        "Initialize ROS publisher /subscriber"
+        #PUBLISHER
+        self.path_subscriber = rospy.Subscriber("/output/image_treated",Image,self.callback,queue_size =1)
+        if VERBOSE:
+            print "subscribed to /output/image_treated"
 
 
-def callback(data):
-    rospy.loginfo(rospy.get_caller_id()  + ' I recieved %s' , data.data)
-    fh=open("r_v1.txt","w")
-    fh.write(data.data)
-    fh.close
-    program ='./demo.exe'
-    arg = 'r_v1.txt'
-    subprocess.call([program, arg])
-    #wait(10)
+    def callback(self,ros_data):
+        bridge=CvBridge()
+        img = bridge.imgmsg_to_cv2(ros_data,"8UC1")
+        if VERBOSE:
+            cv2.imshow("picture",img)
+            cv2.waitKey(2)
+        printE(img)
 
-
-def listener():
-    rospy.init_node('pathPlanner',anonymous=False)
-    rospy.Subscriber('map', String, callback)
-    rospy.spin()
-
-
-def talker():
-    pub = rospy.Publisher('path',String, queue_size = 10) #topic=path
-    #rate = rospy.Rate(1) # 1 hz       #rate of publishing
-    #if not rospy.is_shutdown():
-    file_obj= open("testoutput1.txt","r")                #Read-only matrix.txt
-    r = file_obj.read()                                 #reads the whole txt 1 line a time
-    #rospy.loginfo(r)                                    #logs info in terminal
-    pub.publish(r)                                      #publishes msg
-    #rate.sleep()                                        #sleeps to adjust rate()
-
+def main(args):
+    '''Initializes and cleanup ros node'''
+    path_planner()
+    rospy.init_node('path_planner',anonymous=False)
+    try:
+        rospy.spin()
+    except KeyboardInterrupt:
+        print "Shutting down ROS Image feature detector module"
+    cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    listener()
-    #talker()
+    main(sys.argv)
