@@ -49,7 +49,7 @@ fx = 0            #frobits x coord
 fy = 0            #frobits y coord
 tx = 0            #targets x coord
 ty = 0            #targets y coord
-
+theta = 0
 color_img= np.ndarray
 
 
@@ -198,61 +198,73 @@ class image_feature:
 
     def callback4(self,ros_data):
         global mark4Flag
-        mark4Flag = True
-        x.append(ros_data.x)
-        y.append(ros_data.y)
+        if ros_data.quality >0.7:
+            #print "flag 4 - good quality"
+            mark4Flag = True
+            x.append(ros_data.x)
+            y.append(ros_data.y)
 
     def callback5(self,ros_data):
         global mark5Flag
-        mark5Flag = True
-        x.append(ros_data.x)
-        y.append(ros_data.y)
+        if ros_data.quality >0.7:
+            mark5Flag = True
+            x.append(ros_data.x)
+            y.append(ros_data.y)
 
 
     def callback6(self,ros_data):
         global mark6Flag
-        mark6Flag = True
-        x.append(ros_data.x)
-        y.append(ros_data.y)
-
+        if ros_data.quality >0.7:
+            mark6Flag = True
+            x.append(ros_data.x)
+            y.append(ros_data.y)
 
     def callback8(self,ros_data):
         global mark8Flag
-        mark8Flag = True
-        #print mark8Flag
-        x.append(ros_data.x)
-        y.append(ros_data.y)
+        if ros_data.quality >0.7:
+            mark8Flag = True
+            #print mark8Flag
+            x.append(ros_data.x)
+            y.append(ros_data.y)
 
     def target(self,ros_data):
         global targetFlag
-        targetFlag = True
-        global tx
-        tx = int(ros_data.x)
-        global ty
-        ty = int(ros_data.y)
+        if ros_data.quality >0.7:
+            targetFlag = True
+            global tx
+            tx = int(ros_data.x)
+            global ty
+            ty = int(ros_data.y)
 
     def frobit(self,ros_data):
         global frobitFlag
-        frobitFlag = True
-        global fx
-        fx= int(ros_data.x)
-        global fy
-        fy= int(ros_data.y)
+        if ros_data.quality >0.7:
+            frobitFlag = True
+            global fx
+            fx= int(ros_data.x)
+            global fy
+            fy= int(ros_data.y)
+            global theta
+            theta = int(ros_data.theta)
 
     def callbackMaster(self,ros_data):
         img=bridge.imgmsg_to_cv2(ros_data,"bgr8")
         print "entered master"
+        global mark4Flag
+        global mark8Flag
+        global mark6Flag
+        global mark5Flag
         #print mark4Flag, mark8Flag
-        if mark4Flag and mark5Flag and mark6Flag and mark8Flag:
-            #print "if state"
+        if  mark4Flag and mark5Flag and mark6Flag and mark8Flag:
+            print "flags match"
             hx = int(max(x))
             lx = int(min(x))
             hy = int(max(y))
             ly = int(min(y))
-            new_img = img[ly:hy, lx:hx]
-            cv2.imshow("cropped",img) # change to new_img for crop
+            new_img = img[ly-13:hy+13, lx-13:hx+13]
+            cv2.imshow("cropped",new_img) # change to new_img for crop
             cv2.waitKey(3)
-            obj = findRed(img)
+            obj = findRed(new_img)
             colorScale(obj)
             if VERBOSE:
                 cv2.imshow('the raw image',img)
@@ -261,57 +273,17 @@ class image_feature:
             msg=bridge.cv2_to_imgmsg(obj, encoding="8UC1")
             self.image_pub.publish(msg)
             cmsg = coord()
-            cmsg.fx = fx
-            cmsg.fy = fy
-            cmsg.tx = tx
-            cmsg.ty = ty
+            cmsg.fx = fx - lx
+            cmsg.fy = fy - ly
+            cmsg.theta = theta
+            cmsg.tx = tx - lx
+            cmsg.ty = ty - ly
             self.coord_pub.publish(cmsg)
-            global mark4Flag
             mark4Flag = False
-            global mark8Flag
             mark8Flag = False
+            mark6Flag = False
+            mark5Flag = False
 
-
-
-
-
-    def callback3(self,ros_data):
-        img=bridge.imgmsg_to_cv2(ros_data,"bgr8")
-        #color_img = img
-        print "started callback 3"
-       #print type(img)
-        #hx = int(max(x))
-        #lx = int(min(x))
-        #hy = int(max(y))
-        #ly = int(min(y))
-        #new_img = img[ly:hy, lx:hx]
-        #checker = False
-        #print mark_data
-        #cv2.imshow("recieved raw image",img)
-        #cv2.waitKey(5)
-
-
-
-    def callback2(self,ros_data):
-        timestamp.append(ros_data.timestamp) #putting the timestamps into list
-        tmp1=int(round(ros_data.x))
-        tmp2=int(round(ros_data.y))
-        x.append(tmp1) # appending x coord in list
-        y.append(tmp2) # appendign y coord in list
-        if len(timestamp) == 2:
-            #print len(timestamp)
-            if timestamp[0] == timestamp[1]: # check for sync
-                #checker = True
-                #print timestamp , x , y
-                del timestamp[:] , x[:],y[:]
-            else:
-                print "msg not in sync"
-
-#      if ros_data.quality > 0.7:
-   #         print ros_data.timestamp
-    #    else:
-     #       print ros_data
-            #print "Thor is shinning golden GOD amongst sheeps"
 
     def callback(self,ros_data):
         img = bridge.imgmsg_to_cv2(ros_data,"bgr8")
@@ -337,10 +309,6 @@ def main(args):
     image_feature()
     rospy.init_node('feature_detect', anonymous=False)
     try:
-        #raw_sub = message_filters.Subscriber('/markercapture/raw',Image)
-        #test = message_filters.Subscriber('/markerlocater/markerpose_7',markerpose)
-        #tss = message_filters.TimeSynchronizer([raw_sub,test],0)
-        #tss.registerCallback(image_feature.gotimage)
         rospy.spin()
     except KeyboardInterrupt:
         print "Shutting down ROS Image feature detector module"
