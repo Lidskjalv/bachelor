@@ -1,5 +1,5 @@
-uint32 fx
-uint32 fy
-uint32 theta
-uint32 tx
-uint32 ty
+int32 fx
+int32 fy
+float64 theta
+int32 tx
+int32 ty

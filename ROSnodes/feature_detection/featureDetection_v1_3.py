@@ -24,8 +24,6 @@ import roslib
 import rospy
 
 # Ros Messages
-import message_filters
-
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 
@@ -49,7 +47,8 @@ fx = 0            #frobits x coord
 fy = 0            #frobits y coord
 tx = 0            #targets x coord
 ty = 0            #targets y coord
-theta = 0
+theta = 0         #orientation of the frobit
+Qthresh = 0.007    # threshold for the quality
 color_img= np.ndarray
 
 
@@ -198,7 +197,7 @@ class image_feature:
 
     def callback4(self,ros_data):
         global mark4Flag
-        if ros_data.quality >0.7:
+        if ros_data.quality >Qthresh :
             #print "flag 4 - good quality"
             mark4Flag = True
             x.append(ros_data.x)
@@ -206,7 +205,7 @@ class image_feature:
 
     def callback5(self,ros_data):
         global mark5Flag
-        if ros_data.quality >0.7:
+        if ros_data.quality >Qthresh :
             mark5Flag = True
             x.append(ros_data.x)
             y.append(ros_data.y)
@@ -214,14 +213,14 @@ class image_feature:
 
     def callback6(self,ros_data):
         global mark6Flag
-        if ros_data.quality >0.7:
+        if ros_data.quality >Qthresh :
             mark6Flag = True
             x.append(ros_data.x)
             y.append(ros_data.y)
 
     def callback8(self,ros_data):
         global mark8Flag
-        if ros_data.quality >0.7:
+        if ros_data.quality >Qthresh :
             mark8Flag = True
             #print mark8Flag
             x.append(ros_data.x)
@@ -229,7 +228,7 @@ class image_feature:
 
     def target(self,ros_data):
         global targetFlag
-        if ros_data.quality >0.7:
+        if ros_data.quality >Qthresh :
             targetFlag = True
             global tx
             tx = int(ros_data.x)
@@ -238,7 +237,7 @@ class image_feature:
 
     def frobit(self,ros_data):
         global frobitFlag
-        if ros_data.quality >0.7:
+        if ros_data.quality >Qthresh :
             frobitFlag = True
             global fx
             fx= int(ros_data.x)
@@ -297,7 +296,6 @@ class image_feature:
             cv2.waitKey(2)
         msg=bridge.cv2_to_imgmsg(obj, encoding="8UC1")
         msg2=bridge.cv2_to_imgmsg(img,encoding="bgr8")
-
         self.image_pub.publish(msg)
         self.image_pub_display.publish(msg2)
         #self.subscriber.unregister()
