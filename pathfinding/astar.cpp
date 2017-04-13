@@ -1,18 +1,18 @@
 #include "astar.h"
 
 
-aStar::aStar(vector<vector<int> > * aRoadMap, int aStartX, int aStartY, int aEndX, int aEndY)
+aStar::aStar(vector<vector<int> > aRoadMap, int aStartX, int aStartY, int aEndX, int aEndY)
 {
 
 	roadmap = intToPixel(aRoadMap);
 	endX = aEndX;
-    	endY = aEndY;
+    endY = aEndY;
 	inputMap = aRoadMap;
 	startX = aStartX;
 	startY = aStartY;
-	(*inputMap)[startX][startY] = startPos;
-	(*inputMap)[endX][endY] = desPos;
-	//printMap();
+	inputMap[startX][startY] = startPos;
+	inputMap[endX][endY] = desPos;
+	printMap();
 	navigate(startX, startY);
 }
 
@@ -136,11 +136,11 @@ void aStar::findShortestPath()
 	}
 	for (int i = 0; i < shortPX.size(); i++)
 	{
-		(*inputMap)[shortPX[i]][shortPY[i]] = shortestPath;
+		inputMap[shortPX[i]][shortPY[i]] = shortestPath;
 	}
-	(*inputMap)[startX][startY] = startPos;
-	(*inputMap)[endX][endY] = desPos;
-	//printMap();
+	inputMap[startX][startY] = startPos;
+	inputMap[endX][endY] = desPos;
+	printMap();
 }
 
 vector<int> aStar::getXList()
@@ -191,7 +191,7 @@ void aStar::updateAdjecentSquares(Pixel * currentPixel)
 				
 				if (!(j == 0 && i == 0))
 				{
-				if ((*roadmap)[currentPixel->x+j][currentPixel->y+i].value == walkAble)
+				if (roadmap[currentPixel->x+j][currentPixel->y+i].value == walkAble)
 				{
 					Pixel * aPixel = new Pixel;
 					aPixel->x = currentPixel->x+j;
@@ -289,28 +289,26 @@ void aStar::updateAdjecentSquares(Pixel * currentPixel)
 	 return false;
  }
 
- vector<vector<Pixel>> * aStar::intToPixel(vector<vector<int>> * input)
+ vector<vector<Pixel>> aStar::intToPixel(vector<vector<int>> input)
  {
 	 //This method maps the values of a vec<vec<int>> to vec<vec<pixel>>
-	 //vector<vector<int>> & inputRef = *input;
-	 width = input->size();
-	 height = (*input)[0].size();
-	 vector<vector<Pixel>> * output = new vector<vector<Pixel>>; //Initiliasizes empty vector
-	 //vector<vector<Pixel>> & outputRef = *output;
-	 (*output).resize(width); //Resizes the width
+	 width = input.size();
+	 height = input[0].size();
+	 vector<vector<Pixel>> output; //Initiliasizes empty vector
+	 output.resize(width); //Resizes the width
 	 for (int w = 0; w < width; w++)
 	 {
-		 (*output)[w].resize(height); //Resizes the heigth;
+		 output[w].resize(height); //Resizes the heigth;
 	 }
 
-	 for (int yi = 0; yi < height; yi++)
+	 for (int yi = 0; yi < input.size(); yi++)
 	 {
-		 for (int xi = 0; xi < width; xi++)
+		 for (int xi = 0; xi < input.size(); xi++)
 		 {
 
-			 (*output)[xi][yi].x = xi; //Setting x pixel values
-			 (*output)[xi][yi].y = yi; //Setting y pixel values
-			 (*output)[xi][yi].value = (*input)[xi][yi]; //Setting the value from the input to the pixels
+			 output[xi][yi].x = xi; //Setting x pixel values
+			 output[xi][yi].y = yi; //Setting y pixel values
+			 output[xi][yi].value = input[xi][yi]; //Setting the value from the input to the pixels
 		 }
 	 }
 
@@ -324,16 +322,10 @@ void aStar::updateAdjecentSquares(Pixel * currentPixel)
 	 {
 		 for (int xi = 0; xi < width; xi++)
 		 {
-			 cout << (*inputMap)[xi][yi] << " ";
+			 cout << inputMap[xi][yi] << " ";
 		 }
 		 cout << endl;
-		
 	 }
- }
-
- vector<vector<int>>* aStar::getMap()
- {
-	 return inputMap;
  }
 
 
