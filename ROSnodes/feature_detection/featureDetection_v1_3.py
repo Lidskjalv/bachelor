@@ -253,7 +253,7 @@ class image_feature:
         global mark8Flag
         global mark6Flag
         global mark5Flag
-        #print mark4Flag, mark8Flag
+        print mark4Flag, mark8Flag, mark6Flag,mark5Flag
         if  mark4Flag and mark5Flag and mark6Flag and mark8Flag:
             print "flags match"
             hx = int(max(x))
