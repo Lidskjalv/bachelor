@@ -33,7 +33,7 @@ def save(image):
 
 
 def listener():
-    rospy.init_node('Drawroute',anonymous=False)
+    rospy.init_node('draw_route',anonymous=False)
     rospy.Subscriber('path',String,callback)
     rospy.spin()
 
